@@ -1,46 +1,51 @@
-# Astro Starter Kit: Basics
+# solace
+
+Personal landing page. Built with [Astro](https://astro.build).
+
+## Stack
+
+- **Astro** — static site generator
+- **IBM Plex Mono** — typography
+- **Lanyard API** — Discord presence (Spotify / game status)
+- **CSS Scroll Snap** — section-based scrolling
+
+## Structure
+
+```
+src/
+├── assets/
+│   └── photos/           ← not committed (see .gitignore)
+├── components/
+│   ├── PhotoCollage.astro
+│   └── Button.astro
+├── layouts/
+│   └── BaseLayout.astro
+└── pages/
+    └── index.astro
+```
+
+## Commands
 
 ```sh
-pnpm create astro@latest -- --template basics
+npm install
+npm run dev        # localhost:4321
+npm run build
+npm run preview
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Photos
 
-## 🚀 Project Structure
+Drop images into `src/assets/photos/` — Astro optimizes them at build time.
+The folder is gitignored so photos never end up in the repo.
 
-Inside of your Astro project, you'll see the following folders and files:
+Supported: `jpg`, `jpeg`, `png`, `webp`
 
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
-```
+## Discord Presence
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+Uses [Lanyard](https://github.com/Phineas/lanyard) to show current Spotify track or active game.
 
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `pnpm install`             | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+1. Join the [Lanyard Discord server](https://discord.gg/lanyard)
+2. Set your Discord user ID in `src/pages/index.astro`:
+   ```js
+   const DISCORD_ID = "your_id_here";
+   ```
