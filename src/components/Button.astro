@@ -1,0 +1,75 @@
+---
+const { text, href, variant = 'primary' } = Astro.props;
+---
+
+<a href={href} class={`btn btn--${variant}`}>
+  <span class="btn__text">{text}</span>
+  <span class="btn__arrow">→</span>
+</a>
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.9rem 1.8rem;
+    border: 1px solid var(--amber);
+    color: var(--amber);
+    background: transparent;
+    position: relative;
+    overflow: hidden;
+    transition: color 0.3s ease;
+    cursor: pointer;
+  }
+
+  .btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--amber);
+    transform: translateX(-101%);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 0;
+  }
+
+  .btn:hover::before {
+    transform: translateX(0);
+  }
+
+  .btn:hover {
+    color: var(--espresso);
+  }
+
+  .btn__text,
+  .btn__arrow {
+    position: relative;
+    z-index: 1;
+  }
+
+  .btn__arrow {
+    transition: transform 0.3s ease;
+  }
+
+  .btn:hover .btn__arrow {
+    transform: translateX(4px);
+  }
+
+  .btn--ghost {
+    border-color: var(--border);
+    color: var(--muted);
+  }
+
+  .btn--ghost::before {
+    background: rgba(200, 131, 42, 0.1);
+  }
+
+  .btn--ghost:hover {
+    color: var(--crema);
+    border-color: var(--amber);
+  }
+</style>

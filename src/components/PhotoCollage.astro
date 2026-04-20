@@ -1,0 +1,276 @@
+---
+import { Image } from 'astro:assets';
+
+const imageModules = import.meta.glob<{ default: ImageMetadata }>(
+  '../assets/photos/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}',
+  { eager: true }
+);
+
+const images = Object.values(imageModules)
+  .map(m => m.default)
+  .sort(() => Math.random() - 0.5);
+const hasPhotos = images.length > 0;
+---
+
+{hasPhotos ? (
+  <section class="collage">
+    <div class="collage__grid">
+      {images.map((img, i) => (
+        <div
+          class="collage__item"
+          style={`--i: ${i}; --delay: ${(i % 6) * 130}ms;`}
+          data-src={img.src}
+        >
+          <Image
+            src={img}
+            alt={`Foto ${i + 1}`}
+            width={700}
+            loading="lazy"
+            class="collage__img"
+          />
+        </div>
+      ))}
+    </div>
+
+    <!-- lightbox -->
+    <div id="lightbox" class="lightbox" role="dialog" aria-modal="true">
+      <button id="lb-close" class="lightbox__close" aria-label="Schließen">✕</button>
+      <button id="lb-prev"  class="lightbox__nav lightbox__nav--prev" aria-label="Zurück">←</button>
+      <button id="lb-next"  class="lightbox__nav lightbox__nav--next" aria-label="Weiter">→</button>
+      <div class="lightbox__stage">
+        <img id="lb-img" class="lightbox__img" src="" alt="" />
+      </div>
+      <p id="lb-counter" class="lightbox__counter"></p>
+    </div>
+  </section>
+) : (
+  <section class="collage collage--empty">
+    <p class="collage__hint">
+      // lege fotos in <code>src/assets/photos/</code> ab
+    </p>
+  </section>
+)}
+
+<style>
+  .collage {
+    padding: 4rem 0 6rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .collage__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    padding: 0 2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+    align-items: start;
+  }
+
+  .collage__item:nth-child(5n+1) { grid-row: span 2; }
+  .collage__item:nth-child(7n+4) { grid-column: span 2; }
+
+  .collage__item:nth-child(6n+1) { --rot: -2.5deg; --tx:  4px; --ty:  6px; --fly-x: -160px; }
+  .collage__item:nth-child(6n+2) { --rot:  1.8deg; --tx: -6px; --ty:  2px; --fly-x:  160px; }
+  .collage__item:nth-child(6n+3) { --rot: -1.2deg; --tx:  2px; --ty: -4px; --fly-x: -120px; }
+  .collage__item:nth-child(6n+4) { --rot:  3.0deg; --tx: -4px; --ty:  8px; --fly-x:  120px; }
+  .collage__item:nth-child(6n+5) { --rot: -2.0deg; --tx:  6px; --ty: -2px; --fly-x: -180px; }
+  .collage__item:nth-child(6n+6) { --rot:  0.8deg; --tx: -2px; --ty:  4px; --fly-x:  140px; }
+
+  .collage__item {
+    --rot: -1deg;
+    --tx: 0px;
+    --ty: 0px;
+    --fly-x: -100px;
+    cursor: pointer;
+    opacity: 0;
+    transform: rotate(var(--rot)) translate(var(--tx), var(--ty)) translateX(var(--fly-x));
+    transition:
+      transform 0.85s cubic-bezier(0.16, 1, 0.3, 1) var(--delay, 0ms),
+      opacity   0.6s  ease                           var(--delay, 0ms);
+  }
+
+  .collage__item.is-visible {
+    opacity: 1;
+    transform: rotate(var(--rot)) translate(var(--tx), var(--ty)) translateX(0px);
+  }
+
+  .collage__item.is-visible:hover {
+    transform: rotate(0deg) translate(0px, -6px) translateX(0px) scale(1.03);
+    box-shadow: 0 20px 52px rgba(0,0,0,0.65);
+    position: relative;
+    z-index: 10;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .collage__img {
+    width: 100%;
+    height: auto;
+    display: block;
+    filter: brightness(0) blur(3px);
+    transition: filter 1s cubic-bezier(0.4, 0, 0.2, 1) var(--delay, 0ms);
+    pointer-events: none;
+  }
+
+  .collage__item.is-visible .collage__img {
+    animation: develop 1.2s cubic-bezier(0.4, 0, 0.2, 1) var(--delay, 0ms) both;
+  }
+
+  @keyframes develop {
+    0%   { filter: brightness(0)    blur(3px)   sepia(0);    }
+    25%  { filter: brightness(0.2)  blur(1.5px) sepia(0.8);  }
+    55%  { filter: brightness(0.55) blur(0.5px) sepia(0.35); }
+    100% { filter: brightness(1)    blur(0px)   sepia(0);    }
+  }
+
+  /* ── LIGHTBOX ───────────────────────────────── */
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    background: rgba(10, 8, 6, 0.96);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .lightbox.is-open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .lightbox__stage {
+    max-width: 90vw;
+    max-height: 88vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .lightbox__img {
+    max-width: 90vw;
+    max-height: 85vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
+    transition: opacity 0.2s ease;
+  }
+
+  .lightbox__img.is-loading { opacity: 0; }
+
+  .lightbox__close {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: none;
+    border: 1px solid rgba(240,230,206,0.2);
+    color: var(--crema);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    width: 2.4rem;
+    height: 2.4rem;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .lightbox__close:hover { border-color: var(--crema); }
+
+  .lightbox__nav {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: 1px solid rgba(240,230,206,0.15);
+    color: var(--crema);
+    font-family: var(--font-mono);
+    font-size: 1.2rem;
+    width: 3rem;
+    height: 3rem;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .lightbox__nav:hover { border-color: var(--crema); background: rgba(240,230,206,0.05); }
+  .lightbox__nav--prev { left: 1.5rem; }
+  .lightbox__nav--next { right: 1.5rem; }
+
+  .lightbox__counter {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: rgba(240,230,206,0.4);
+  }
+
+  /* empty state */
+  .collage--empty { padding: 3rem 2rem; }
+
+  .collage__hint {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  .collage__hint code {
+    color: var(--amber);
+    font-family: var(--font-mono);
+  }
+
+  @media (max-width: 600px) {
+    .collage__grid { grid-template-columns: repeat(2, 1fr); gap: 1.2rem; }
+    .collage__item:nth-child(7n+4) { grid-column: span 1; }
+    .lightbox__nav--prev { left: 0.5rem; }
+    .lightbox__nav--next { right: 0.5rem; }
+  }
+</style>
+
+<script>
+  // scroll-in animation
+  const items = document.querySelectorAll<HTMLElement>('.collage__item');
+  const observer = new IntersectionObserver(
+    entries => entries.forEach(e => { if (e.isIntersecting) { (e.target as HTMLElement).classList.add('is-visible'); observer.unobserve(e.target); } }),
+    { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
+  );
+  items.forEach(item => observer.observe(item));
+
+  // lightbox
+  const lb        = document.getElementById('lightbox')!;
+  const lbImg     = document.getElementById('lb-img') as HTMLImageElement;
+  const lbCounter = document.getElementById('lb-counter')!;
+  const srcs      = Array.from(items).map(el => el.dataset.src ?? '');
+  let current     = 0;
+
+  function show(index: number) {
+    current = (index + srcs.length) % srcs.length;
+    lbImg.classList.add('is-loading');
+    lbImg.onload = () => lbImg.classList.remove('is-loading');
+    lbImg.src = srcs[current];
+    lbCounter.textContent = `${current + 1} / ${srcs.length}`;
+  }
+
+  function open(index: number) { show(index); lb.classList.add('is-open'); document.body.style.overflow = 'hidden'; }
+  function close()             { lb.classList.remove('is-open'); document.body.style.overflow = ''; }
+
+  items.forEach((item, i) => item.addEventListener('click', () => open(i)));
+
+  document.getElementById('lb-close')!.addEventListener('click', close);
+  document.getElementById('lb-prev')! .addEventListener('click', () => show(current - 1));
+  document.getElementById('lb-next')! .addEventListener('click', () => show(current + 1));
+
+  lb.addEventListener('click', e => { if (e.target === lb) close(); });
+
+  document.addEventListener('keydown', e => {
+    if (!lb.classList.contains('is-open')) return;
+    if (e.key === 'Escape')      close();
+    if (e.key === 'ArrowLeft')   show(current - 1);
+    if (e.key === 'ArrowRight')  show(current + 1);
+  });
+</script>

@@ -1,11 +1,436 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PhotoCollage from '../components/PhotoCollage.astro';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const DISCORD_ID = "140777947178074112";
+
+const links = [
+  { label: 'GitHub',    href: 'https://github.com/heyimsolace',                   desc: 'code undso' },
+  { label: 'Instagram', href: 'https://instagram.com/heyimsolace',                desc: 'amateur fotos' },
+  { label: 'Discord',   href: 'https://discord.com/users/140777947178074112',     desc: 'weird auf main' },
+  { label: 'Genius',    href: 'https://genius.com/slce',                   		  desc: 'semi-gute lyrics' },
+  { label: 'Spotify',   href: 'https://open.spotify.com/user/realdoctortree',     desc: 'meine playlists' },
+  { label: 'stats.fm',  href: 'https://stats.fm/heyimsolace',                     desc: 'meine musik stats' },
+  { label: 'Scribrewer', href: 'https://scribrewer.nitsuj.de', 				      desc: 'lyrics scriben' },
+  { label: 'Unsplash', href: 'https://unsplash.com/@heyimsolace',                 desc: 'meine fotos (free)' }
+];
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<BaseLayout title="solace">
+<main>
+
+  <!-- ── HERO ─────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero__inner">
+
+      <!-- identity + links row -->
+      <div class="hero__meta">
+        <div class="hero__tags">
+          <span>fotos</span>
+          <span class="sep">·</span>
+          <span class="italic">moped</span>
+          <span class="sep">·</span>
+          <span class="bold">kaffee</span>
+		  <span class="sep">·</span>
+          <span class="italic">games</span>
+		  <span class="sep">·</span>
+          <span>lyrics</span>
+        </div>
+      </div>
+
+      <!-- escalating bars — the swissfolio signature -->
+      <div class="bars">
+        <div class="bar bar--xs"></div>
+        <div class="bar bar--sm"></div>
+        <div class="bar bar--md"></div>
+        <div class="bar bar--lg"></div>
+        <div class="bar bar--xl"></div>
+        <div class="bar bar--2xl"></div>
+      </div>
+
+      <!-- name + presence -->
+      <div class="hero__bottom">
+        <div class="hero__name-group">
+          <h1 class="hero__name">solace</h1>
+          <p class="hero__sub">eig justin, aber psht</p>
+        </div>
+        <div id="presence" class="presence-box" data-discord-id={DISCORD_ID}>
+          <span id="status-dot" class="presence-box__dot"></span>
+          <div class="presence-box__text">
+            <span id="presence-label" class="presence-box__label">laden…</span>
+            <span id="presence-detail" class="presence-box__detail"></span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  
+  <!-- ── LINKS ────────────────────────────────────── -->
+  <section class="links-section">
+    <ul class="link-panels">
+      {links.map((l, i) => (
+        <li class="link-panel">
+          <a href={l.href} target="_blank" rel="noopener noreferrer">
+            <div class="link-panel__left">
+              <span class="link-panel__name">{l.label} <span class="link-panel__arrow">↗</span></span>
+              <span class="link-panel__desc">{l.desc}</span>
+            </div>
+            <span class="link-panel__num">{String(i + 1).padStart(2, '0')}.</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <!-- ── FOTOS ──────────────────────────────────────── -->
+  <div class="snap-section">
+    <PhotoCollage />
+  </div>
+
+
+</main>
+</BaseLayout>
+
+<script>
+  async function fetchPresence() {
+    const el = document.getElementById('presence');
+    const DISCORD_ID = el?.dataset.discordId;
+    const dot    = document.getElementById('status-dot')!;
+    const label  = document.getElementById('presence-label')!;
+    const detail = document.getElementById('presence-detail')!;
+    try {
+      const { data } = await fetch(`https://api.lanyard.rest/v1/users/${DISCORD_ID}`).then(r => r.json());
+      const colors: Record<string,string> = { online:'#5a9e6f', idle:'#c8a82a', dnd:'#b84040', offline:'#3a3a3a' };
+      dot.style.background = colors[data.discord_status] ?? '#3a3a3a';
+      if (data.spotify) { label.textContent = `♪  ${data.spotify.song}`; detail.textContent = data.spotify.artist; return; }
+      const game = data.activities?.find((a:any) => a.type === 0);
+      if (game) { label.textContent = `▶  ${game.name}`; detail.textContent = game.details ?? ''; return; }
+      label.textContent = data.discord_status === 'offline' ? 'offline' : 'nichts aktiv';
+      detail.textContent = '';
+    } catch { label.textContent = 'nicht erreichbar'; }
+  }
+  fetchPresence();
+  setInterval(fetchPresence, 15000);
+
+  // links entrance animation
+  const linksSection = document.querySelector('.links-section')!;
+  const linkPanels   = document.querySelectorAll<HTMLElement>('.link-panel');
+  new IntersectionObserver(([entry]) => {
+    if (!entry.isIntersecting) return;
+    linkPanels.forEach((panel, i) => {
+      panel.style.setProperty('--panel-delay', `${i * 65}ms`);
+      panel.classList.add('is-visible');
+    });
+  }, { threshold: 0.1 }).observe(linksSection);
+</script>
+
+<style>
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  /* ── HERO ──────────────────────────────────────── */
+  .hero {
+    height: 100vh;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 0;
+  }
+
+  .hero__meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 0.75rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .hero__tags {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+  }
+
+  .hero__tags .italic { font-style: italic; color: var(--crema); }
+  .hero__tags .bold   { color: var(--amber); }
+  .hero__tags .sep    { color: var(--border); }
+
+  .hero__links {
+    list-style: none;
+    display: flex;
+    gap: 2rem;
+  }
+
+  .hero__links a {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  .hero__links a:hover { color: var(--crema); }
+
+  /* escalating bars */
+  .bars {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0.6rem 0;
+  }
+
+  .bar           { width: 100%; background: var(--crema); }
+  .bar--xs       { height: 2px; }
+  .bar--sm       { height: 6px; }
+  .bar--md       { height: 14px; }
+  .bar--lg       { height: 28px; }
+  .bar--xl       { height: 56px; }
+  .bar--2xl      { height: 96px; }
+
+  .hero__bottom {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 0.5rem 0 2rem;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .hero__name {
+    font-family: var(--font-mono);
+    font-size: clamp(3rem, 11vw, 7.5rem);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    color: var(--crema);
+    line-height: 1;
+  }
+
+  .hero__name-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .hero__sub {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    font-style: italic;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  /* presence box */
+  .presence-box {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border: 1px solid var(--border);
+    background: #161210;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.35rem;
+    min-width: 200px;
+  }
+
+  .presence-box__dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #3a3a3a;
+    flex-shrink: 0;
+    transition: background 0.4s;
+  }
+
+  .presence-box__text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+  }
+
+  .presence-box__label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--crema);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .presence-box__detail {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ── LINKS ────────────────────────────────────── */
+  .links-section {
+    min-height: 100vh;
+    scroll-snap-align: start;
+    display: flex;
+    align-items: center;
+    padding: 3rem 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .link-panels {
+    width: 100%;
+  }
+
+  .snap-section {
+    scroll-snap-align: start;
+    min-height: 100vh;
+  }
+
+  .links-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .links-header__line {
+    height: 1px;
+    background: var(--crema);
+    width: 100%;
+  }
+
+  .links-header__label {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+  }
+
+  .links-header__label .bold { color: var(--crema); font-weight: 600; }
+
+  .link-panels {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+
+  .link-panel {
+    background: #161210;
+    overflow: hidden;
+    transition: background 0.25s ease, opacity 0.5s ease var(--panel-delay, 0ms), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) var(--panel-delay, 0ms);
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  .link-panel.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .link-panel:hover {
+    background: var(--crema);
+  }
+
+  .link-panel a {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 1.5rem;
+    height: 100%;
+    min-height: 160px;
+    position: relative;
+  }
+
+  .link-panel__left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .link-panel__name {
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--crema);
+    letter-spacing: 0.05em;
+    transition: color 0.25s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .link-panel__arrow {
+    transition: transform 0.25s ease, color 0.25s ease;
+    color: var(--muted);
+  }
+
+  .link-panel:hover .link-panel__arrow {
+    transform: translate(3px, -3px);
+    color: var(--espresso);
+  }
+
+  .link-panel__desc {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    line-height: 1.5;
+    transition: color 0.25s ease;
+  }
+
+  .link-panel:hover .link-panel__name,
+  .link-panel:hover .link-panel__desc {
+    color: var(--espresso);
+  }
+
+  .link-panel__num {
+    font-family: var(--font-mono);
+    font-size: clamp(5rem, 9vw, 8rem);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--crema);
+    opacity: 0.12;
+    transition: color 0.25s ease, opacity 0.25s ease;
+    position: absolute;
+    bottom: -0.1em;
+    right: 1rem;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .link-panel:hover .link-panel__num {
+    color: var(--espresso);
+    opacity: 0.2;
+  }
+
+  .link-panel:hover .link-panel__num {
+    color: var(--espresso);
+  }
+
+  /* ── RESPONSIVE ───────────────────────────────── */
+  @media (max-width: 640px) {
+    .hero__meta    { flex-direction: column; align-items: flex-start; }
+    .intro__grid   { grid-template-columns: 1fr; }
+    .intro__big    { text-indent: 2rem; }
+    .about__grid   { grid-template-columns: 1fr; }
+    .link-panels   { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
