@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PhotoCollage from '../components/PhotoCollage.astro';
+import TargetCursor from '../components/TargetCursor.jsx';
 
 const DISCORD_ID = "140777947178074112";
 
@@ -17,6 +18,7 @@ const links = [
 ---
 
 <BaseLayout title="solace">
+<TargetCursor client:only="react" spinDuration={2} hideDefaultCursor={true} parallaxOn={true} />
 <main>
 
   <!-- ── HERO ─────────────────────────────────────── -->
@@ -71,7 +73,7 @@ const links = [
   <section class="links-section">
     <ul class="link-panels">
       {links.map((l, i) => (
-        <li class="link-panel">
+        <li class="link-panel cursor-target">
           <a href={l.href} target="_blank" rel="noopener noreferrer">
             <div class="link-panel__left">
               <span class="link-panel__name">{l.label} <span class="link-panel__arrow">↗</span></span>
