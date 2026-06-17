@@ -1,17 +1,5 @@
 ---
 import MasonryCollage from './MasonryCollage.jsx';
-
-const imageModules = import.meta.glob<{ default: ImageMetadata }>(
-  '../assets/photos/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}',
-  { eager: true }
-);
-
-const photos = Object.entries(imageModules).map(([path, m]) => ({
-  id: path.split('/').pop() ?? path,
-  img: m.default.src,
-  width: m.default.width,
-  height: m.default.height,
-}));
 ---
 
-<MasonryCollage client:only="react" photos={photos} />
+<MasonryCollage client:only="react" />
