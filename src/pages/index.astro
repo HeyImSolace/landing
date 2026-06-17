@@ -88,6 +88,10 @@ const links = [
 
   <!-- ── FOTOS ──────────────────────────────────────── -->
   <div class="snap-section">
+    <div class="fotos-header">
+      <h2 class="fotos-title">Meine Bilder :)</h2>
+      <p class="fotos-sub">Wenn du ein cooles auto oder moped hast, schick mir ne DM &lt;3</p>
+    </div>
     <PhotoCollage />
   </div>
 
@@ -425,6 +429,28 @@ const links = [
 
   .link-panel:hover .link-panel__num {
     color: var(--espresso);
+  }
+
+  /* ── FOTOS HEADER ─────────────────────────────── */
+  .fotos-header {
+    padding: 3rem 0 2rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .fotos-title {
+    font-family: var(--font-mono);
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 500;
+    color: var(--amber);
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+  }
+
+  .fotos-sub {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--muted);
+    letter-spacing: 0.04em;
   }
 
   /* ── RESPONSIVE ───────────────────────────────── */
