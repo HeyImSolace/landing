@@ -90,7 +90,7 @@ const links = [
   <div class="snap-section">
     <div class="fotos-header">
       <h2 class="fotos-title">Meine Bilder :)</h2>
-      <p class="fotos-sub">Wenn du ein cooles auto oder moped hast, schick mir ne DM &lt;3</p>
+      <p class="fotos-sub">Wenn du ein cooles auto oder moped hast, <a class="fotos-dm" href="https://instagram.com/heyimsolace" target="_blank" rel="noopener noreferrer">schick mir ne DM</a> &lt;3</p>
     </div>
     <PhotoCollage />
   </div>
@@ -452,6 +452,15 @@ const links = [
     color: var(--muted);
     letter-spacing: 0.04em;
   }
+
+  .fotos-dm {
+    color: var(--crema);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color 0.2s;
+  }
+
+  .fotos-dm:hover { color: var(--amber); }
 
   /* ── RESPONSIVE ───────────────────────────────── */
   @media (max-width: 640px) {
