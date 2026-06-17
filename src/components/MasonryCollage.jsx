@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import Masonry from './Masonry';
 
 const lbStyles = {
@@ -63,12 +63,16 @@ const lbStyles = {
 export default function MasonryCollage({ photos }) {
   const [lightboxIndex, setLightboxIndex] = useState(null);
 
-  const items = photos.map(p => ({
+  const items = useMemo(() => photos.map(p => ({
     id: p.id,
     img: p.img,
     url: '#',
     height: p.height,
-  }));
+  })), [photos]);
+
+  useEffect(() => {
+    return () => { document.body.style.overflow = ''; };
+  }, []);
 
   const open = useCallback(index => {
     setLightboxIndex(index);
@@ -100,9 +104,9 @@ export default function MasonryCollage({ photos }) {
   }, [lightboxIndex, close, prev, next]);
 
   const handleGridClick = e => {
-    e.preventDefault();
     const wrapper = e.target.closest('[data-key]');
     if (!wrapper) return;
+    e.stopPropagation();
     const key = wrapper.dataset.key;
     const index = items.findIndex(item => item.id === key);
     if (index !== -1) open(index);
@@ -113,7 +117,7 @@ export default function MasonryCollage({ photos }) {
   return (
     <>
       <div
-        onClick={handleGridClick}
+        onClickCapture={handleGridClick}
         style={{ width: '100%', minHeight: '100vh' }}
       >
         <Masonry
