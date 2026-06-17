@@ -44,7 +44,7 @@ export async function listPhotos(): Promise<string[]> {
     }
   }
 
-  return filenames;
+  return filenames.sort((a, b) => b.localeCompare(a));
 }
 
 export async function fetchPhoto(filename: string): Promise<Response> {
