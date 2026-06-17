@@ -60,19 +60,31 @@ const lbStyles = {
   },
 };
 
-export default function MasonryCollage({ photos }) {
+export default function MasonryCollage() {
+  const [photos, setPhotos] = useState(null);
+  const [fetchError, setFetchError] = useState(null);
   const [lightboxIndex, setLightboxIndex] = useState(null);
 
-  const items = useMemo(() => photos.map(p => ({
+  useEffect(() => {
+    fetch('/api/photos')
+      .then(r => r.json())
+      .then(data => {
+        if (data.error) throw new Error(data.error);
+        setPhotos(data.photos);
+      })
+      .catch(() => setFetchError('Fotos konnten nicht geladen werden.'));
+  }, []);
+
+  useEffect(() => {
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
+  const items = useMemo(() => (photos ?? []).map(p => ({
     id: p.id,
     img: p.img,
     url: '#',
     height: p.height,
   })), [photos]);
-
-  useEffect(() => {
-    return () => { document.body.style.overflow = ''; };
-  }, []);
 
   const open = useCallback(index => {
     setLightboxIndex(index);
@@ -111,6 +123,16 @@ export default function MasonryCollage({ photos }) {
     const index = items.findIndex(item => item.id === key);
     if (index !== -1) open(index);
   };
+
+  if (fetchError) {
+    return (
+      <p style={{ fontFamily: 'var(--font-mono, monospace)', fontSize: '0.78rem', color: 'var(--muted)', padding: '2rem 0' }}>
+        {fetchError}
+      </p>
+    );
+  }
+
+  if (!photos || photos.length === 0) return null;
 
   const isOpen = lightboxIndex !== null;
 
