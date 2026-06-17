@@ -1,8 +1,8 @@
 const base = () => {
-  const url = process.env.NC_BASE_URL;
-  const user = process.env.NC_USER;
-  const pass = process.env.NC_APP_PASSWORD;
-  const path = process.env.NC_PHOTOS_PATH;
+  const url = import.meta.env.NC_BASE_URL;
+  const user = import.meta.env.NC_USER;
+  const pass = import.meta.env.NC_APP_PASSWORD;
+  const path = import.meta.env.NC_PHOTOS_PATH;
 
   if (!url || !user || !pass || !path) {
     throw new Error('Missing Nextcloud env vars: NC_BASE_URL, NC_USER, NC_APP_PASSWORD, NC_PHOTOS_PATH');
